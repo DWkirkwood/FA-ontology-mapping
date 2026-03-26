@@ -285,6 +285,7 @@ const initialEdges = buildEdges(initialNodes);
 export default function GraphViewer({ activeFilter, onNodeSelect, searchQuery, onFilterChange, selectedNode }: GraphViewerProps) {
     const [isDraggable, setIsDraggable] = useState(false);
     const [activeLayer, setActiveLayer] = useState<number | null>(null);
+    const [revealedLayer, setRevealedLayer] = useState(0);
     const [nodes, setNodes, onNodesChange] = useNodesState<Node>(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialEdges);
 
@@ -318,13 +319,31 @@ export default function GraphViewer({ activeFilter, onNodeSelect, searchQuery, o
             });
         }
 
+        // Build a layer lookup for edge visibility
+        const nodeLayerMap = new Map<string, number>();
+        initialNodes.forEach(n => {
+            if ((n.data as any).layer !== undefined) {
+                nodeLayerMap.set(n.id, (n.data as any).layer);
+            }
+        });
+
         setNodes(nds =>
             nds.map(n => {
-                if (n.id === 'pie-background' || n.id === 'safes-ring') return n;
+                // Progressive reveal for background elements
+                if (n.id === 'pie-background') {
+                    return { ...n, style: { ...(n.style as any), opacity: revealedLayer >= 1 ? 1 : 0, transition: 'opacity 0.8s ease' } };
+                }
+                if (n.id === 'safes-ring') {
+                    return { ...n, style: { ...(n.style as any), opacity: revealedLayer >= 2 ? 1 : 0, transition: 'opacity 0.8s ease' } };
+                }
+
                 const nd = n.data as any;
                 const hasTag = activeFilter ? nd.tags?.includes(activeFilter) : true;
                 const layerMatch = activeLayer !== null ? nd.layer === activeLayer : true;
                 const isCenterReveal = nd.layer === 0 && activeLayer !== null && activeLayer >= 2;
+
+                // Progressive reveal: hide nodes beyond the current revealed layer
+                const isHiddenByReveal = nd.layer !== undefined && nd.layer > revealedLayer;
 
                 // Search match: check label, definitions, and tags
                 let searchMatch = true;
@@ -346,12 +365,20 @@ export default function GraphViewer({ activeFilter, onNodeSelect, searchQuery, o
                         activeFilter,
                         dimmed: isCenterReveal ? false : isDimmed,
                         semiTransparent: isCenterReveal || (selectedNode && !isConnected),
+                        isSelected: selectedNode ? n.id === selectedNode.id : false,
+                        hidden: isHiddenByReveal,
+                        showClickMe: n.id === 'fed_ecosystem' && revealedLayer === 0,
                     },
                 };
             })
         );
 
         setEdges(eds => eds.map(e => {
+            const sourceLayer = nodeLayerMap.get(e.source);
+            const targetLayer = nodeLayerMap.get(e.target);
+            const edgeRevealed = (sourceLayer === undefined || sourceLayer <= revealedLayer) &&
+                                 (targetLayer === undefined || targetLayer <= revealedLayer);
+
             const isConnected = selectedNode
                 ? e.source === selectedNode.id || e.target === selectedNode.id
                 : true;
@@ -360,20 +387,27 @@ export default function GraphViewer({ activeFilter, onNodeSelect, searchQuery, o
                 ...e,
                 style: {
                     ...(e.style as any) || {},
-                    opacity: selectedNode && !isConnected ? 0.1 : 1,
+                    opacity: !edgeRevealed ? 0 : (selectedNode && !isConnected ? 0.1 : 1),
+                    transition: 'opacity 0.8s ease',
                 }
             };
         }));
 
-    }, [activeFilter, activeLayer, searchQuery, selectedNode, setNodes, onEdgesChange]);
+    }, [activeFilter, activeLayer, searchQuery, selectedNode, revealedLayer, setNodes, onEdgesChange]);
 
     const onNodeClick = useCallback(
         (_: React.MouseEvent, node: Node) => {
             if (node.id === 'pie-background' || node.id === 'safes-ring') return;
             const data = node.data as any;
+
+            // Progressive reveal: clicking a node on the current frontier layer reveals the next
+            if (data.layer !== undefined && data.layer === revealedLayer && revealedLayer < 3) {
+                setRevealedLayer(prev => prev + 1);
+            }
+
             onNodeSelect(data as OntologyNode);
         },
-        [onNodeSelect]
+        [onNodeSelect, revealedLayer]
     );
 
     const onPaneClick = useCallback(() => {

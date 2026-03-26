@@ -32,6 +32,9 @@ export default function CustomNode({ data }: CustomNodeProps) {
     const isProvider = data.type === 'provider';
     const isDimmed = data.dimmed;
     const isSemiTransparent = (data as any).semiTransparent;
+    const isSelected = (data as any).isSelected;
+    const isHidden = (data as any).hidden;
+    const showClickMe = (data as any).showClickMe;
     const size = data.nodeSize || 220;
     const showTags = data.showTags !== false;
     const isCenterNode = data.layer === 0;
@@ -52,18 +55,31 @@ export default function CustomNode({ data }: CustomNodeProps) {
         <div
             className={clsx(
                 'custom-node-circle',
-                isDimmed ? 'opacity-30 scale-95 grayscale' :
-                    isSemiTransparent ? 'opacity-25' :
-                        'opacity-100 scale-100',
+                isHidden ? 'node-hidden' :
+                    isDimmed ? 'opacity-30 scale-95 grayscale' :
+                        isSemiTransparent ? 'opacity-25' :
+                            'opacity-100 scale-100',
                 isCenterNode ? 'node-center' :
                     isDefinition ? 'node-definition' :
                         isSolution ? 'node-solution' :
                             isProvider ? 'node-provider' :
-                                'node-default'
+                                'node-default',
+                isSelected && 'node-selected',
+                showClickMe && 'node-has-prompt'
             )}
             style={{ width: size, height: size }}
             title={data.related_terms ? data.related_terms.map(rt => `${rt.term} = ${rt.definition}`).join('\n') : undefined}
         >
+            {/* "Click me" prompt above the center node on landing */}
+            {showClickMe && (
+                <div className="click-me-prompt">
+                    <span>Click me</span>
+                    <svg className="click-me-arrow" width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 2V16M8 16L2 10M8 16L14 10" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                </div>
+            )}
+
             {/* Invisible central handles for all-direction edge connections */}
             <Handle type="target" position={Position.Top} id="center-target" className="!opacity-0 !w-1 !h-1" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
             <Handle type="source" position={Position.Bottom} id="center-source" className="!opacity-0 !w-1 !h-1" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
@@ -103,6 +119,16 @@ export default function CustomNode({ data }: CustomNodeProps) {
                             </div>
                         );
                     })}
+                </div>
+            )}
+
+            {/* Arrow pointing to sidebar when selected */}
+            {isSelected && (
+                <div className="selected-arrow">
+                    <svg width="32" height="18" viewBox="0 0 32 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M30 9H4M4 9L11 2M4 9L11 16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span className="selected-arrow-label">View details</span>
                 </div>
             )}
         </div>

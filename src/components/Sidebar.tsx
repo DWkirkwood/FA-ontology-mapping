@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { OntologyNode, FrameworkTag, frameworkCategories } from '../data/ontology';
 import { tagReasons } from '../data/tagReasons';
 import { frameworkTagDefinitions } from '../data/frameworkTagDefinitions';
-import { SlidersHorizontal, Settings, BookOpen, Fingerprint, ChevronDown, ChevronRight, Search, X } from 'lucide-react';
+import { SlidersHorizontal, Settings, BookOpen, Fingerprint, ChevronDown, ChevronRight, Search, X, AlertTriangle } from 'lucide-react';
 
 interface SidebarProps {
     perspective: 'public' | 'tech' | 'researcher' | 'gov';
@@ -48,7 +48,7 @@ export default function Sidebar({ perspective, setPerspective, activeFilter, set
                 <div>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-teal-600 bg-clip-text text-transparent mb-2 flex items-center gap-3">
                         <Fingerprint className="w-8 h-8 text-blue-600" />
-                        Ontology Map
+                        Language Road Map
                     </h1>
                     <p className="text-sm text-slate-500">Federated Data &amp; Framework Analysis</p>
                 </div>
@@ -62,6 +62,19 @@ export default function Sidebar({ perspective, setPerspective, activeFilter, set
                 >
                     Reset
                 </button>
+            </div>
+
+            {/* Disclaimer Warning Box */}
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl shadow-sm">
+                <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                        <h4 className="font-semibold text-amber-900 text-sm mb-1">Disclaimer: Prototype Content</h4>
+                        <p className="text-xs text-amber-800 leading-relaxed">
+                            The definitions and examples provided in this prototype are AI-generated placeholders intended for illustrative purposes only. This site is a preliminary design developed to facilitate engagement with public and professional stakeholders, who will collaboratively refine and establish the final, agreed-upon content.
+                        </p>
+                    </div>
+                </div>
             </div>
 
             {/* Search Bar */}

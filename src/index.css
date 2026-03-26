@@ -34,6 +34,124 @@
     0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
+/* ===== Selected Node — 3D lift with bezel ===== */
+.node-selected {
+  transform: scale(1.5) !important;
+  z-index: 100 !important;
+  border-width: 3px;
+  box-shadow:
+    /* Soft outer glow */
+    0 0 0 4px rgba(59, 130, 246, 0.15),
+    /* 3D lifted shadow */
+    0 20px 60px rgba(0, 0, 0, 0.18),
+    0 8px 24px rgba(0, 0, 0, 0.10),
+    /* Inner bezel highlight (top-left light) */
+    inset 0 2px 4px rgba(255, 255, 255, 0.45),
+    /* Inner bezel shadow (bottom-right depth) */
+    inset 0 -2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: visible;
+}
+
+.node-selected:hover {
+  transform: scale(1.5) !important;
+}
+
+/* Arrow pointing to sidebar */
+.selected-arrow {
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translate(-100%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #3b82f6;
+  animation: arrow-pulse 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.selected-arrow-label {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #3b82f6;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px 6px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes arrow-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: translate(-100%, -50%) translateX(0);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translate(-100%, -50%) translateX(-6px);
+  }
+}
+
+/* ===== Hidden Nodes (progressive reveal) ===== */
+.node-hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: scale(0.85) !important;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* ===== "Click me" Prompt ===== */
+.node-has-prompt {
+  overflow: visible;
+}
+
+.click-me-prompt {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #1e40af;
+  animation: click-me-bounce 2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 200;
+}
+
+.click-me-prompt span {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  padding: 5px 14px;
+  border-radius: 20px;
+  box-shadow:
+    0 4px 12px rgba(37, 99, 235, 0.35),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+}
+
+.click-me-arrow {
+  color: #3b82f6;
+}
+
+@keyframes click-me-bounce {
+  0%, 100% {
+    transform: translate(-50%, -100%) translateY(0);
+  }
+  50% {
+    transform: translate(-50%, -100%) translateY(-8px);
+  }
+}
+
 /* Center node — solid green */
 .node-center {
   background: #10b981;
